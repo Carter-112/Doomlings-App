@@ -321,12 +321,12 @@
             </div>
         </div>
         <div class="dominant-nav">
-          <button class="nav-button" onclick="showSection('main')">Main Game</button>
+          <button class="nav-button" onclick="showSection('challenges')">Challenges</button>
           <button class="nav-button" onclick="showSection('dominants')">Dominants</button>
           <button class="nav-button" onclick="showSection('ageSetup')">Age Setup</button>
       </div>
 
-        <div id="mainSection">
+        <div id="challengesSection">
             <h1 class="title">DOOMlings</h1>
             
             <div class="player-control">
@@ -346,7 +346,7 @@
                 </div>
             </div>
 
-            <button onclick="rollNewAge()">🎲 ROLL NEW AGE</button>
+            <button onclick="rollNewAge()">🎲 ROLL NEW CHALLENGE</button>
 
             <div class="rule-display" id="ruleDisplay">
                 Tap Roll to start!
@@ -1558,8 +1558,8 @@ const catastropheAgeData = [
 
         // Modify your showSection function
 function showSection(section) {
-    document.getElementById('mainSection').style.display = 
-        section === 'main' ? 'block' : 'none';
+    document.getElementById('challengesSection').style.display = 
+        section === 'challenges' ? 'block' : 'none';
     document.getElementById('dominantSection').style.display = 
         section === 'dominants' ? 'block' : 'none';
     document.getElementById('ageSetupSection').style.display = 
