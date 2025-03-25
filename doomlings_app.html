@@ -5,6 +5,116 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOOMlings Companion</title>
     <style>
+    .next-player-highlight {
+    animation: pulse 1.5s infinite;
+    box-shadow: 0 0 10px #ffcc00;
+    border: 2px solid #ffcc00;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 5px #ffcc00; }
+    50% { box-shadow: 0 0 15px #ffcc00; }
+    100% { box-shadow: 0 0 5px #ffcc00; }
+}
+    
+    .meaning-section {
+    display: none;
+}
+.status-display {
+    background: #16213e;
+    padding: 0.75rem;
+    border-radius: 10px;
+    margin: 0.5rem 0;
+    text-align: center;
+    color: var(--accent1);
+}
+.player-meaning-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+.player-meaning-card {
+    background: #16213e;
+    padding: 0.75rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.player-meaning-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+.player-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: var(--accent1);
+}
+.meaning-cards-container {
+    display: flex;
+    gap: 0.5rem;
+    flex-direction: column;
+}
+.meaning-card {
+    background: #30475e;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: all 0.3s;
+}
+.meaning-card.selected-card {
+    border-color: var(--accent1);
+    background: #30475e88;
+}
+.meaning-card-name {
+    font-weight: bold;
+    color: var(--accent2);
+    margin-bottom: 0.25rem;
+}
+.meaning-card-desc {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+.choose-card-btn {
+    margin-top: 0.5rem;
+    background: var(--accent1);
+    color: #16213e;
+    border: none;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    width: 100%;
+}
+.reveal-button {
+    background: var(--accent2);
+    color: var(--text);
+    border: none;
+    border-radius: 5px;
+    padding: 0.35rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+.status-message {
+    text-align: center;
+    color: var(--text);
+    padding: 1rem;
+}
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+.action-buttons .nav-button {
+    flex: 1;
+}
+#worldsEndButton {
+    background-color: var(--accent2);
+}
+#resetMeaningButton {
+    background-color: #555;
+}
     /* New styles to add */
 @media (max-width: 360px) {
   .nav-button {
@@ -389,9 +499,52 @@
         <div id="dominantSection" class="dominant-section">
             <div class="dominant-list" id="dominantList"></div>
         </div>
+        <div id="meaningOfLifeSection" class="meaning-section">
+    <h2 class="section-title">Meaning of Life</h2>
+    
+    <div class="player-control">
+        <button id="assignMeaningCards" class="generate-btn">Assign Meaning of Life Cards</button>
+        <div id="meaningCardStatus" class="status-display"></div>
+    </div>
+    
+    <div id="playerMeaningCards" class="player-meaning-cards">
+        <!-- Player cards will be generated here -->
+    </div>
+    
+    <div class="action-buttons">
+        <button id="worldsEndButton" class="nav-button">World's End: Reveal All</button>
+        <button id="resetMeaningButton" class="nav-button">Reset Cards</button>
+    </div>
+</div>
     </div>
 
     <script>
+      // Meaning of Life card data
+const meaningOfLifeData = [
+    {
+        name: "Sign 1",
+        description: "Sample sign description that would affect scoring at the end of the game."
+    },
+    {
+        name: "Sign 2",
+        description: "Another sample sign with end-game scoring effects."
+    },
+    {
+        name: "Sign 3",
+        description: "Third placeholder sign for end-game scoring."
+    },
+    {
+        name: "Sign 4",
+        description: "Fourth placeholder sign with scoring effects."
+    }
+
+];
+
+// State variables for Meaning of Life feature
+let playerMeaningCards = {};
+let playerMeaningChoices = {};
+let currentRevealPlayer = null;
+      
       let playerAssignments = {}; // Add these variables at the top of your script
 let nextCardId = 1;
 let cardNameToIdsMap = {}; // Tracks all IDs for each card name
@@ -1587,7 +1740,7 @@ const catastropheAgeData = [
     }
 ];// Add your dominant data here as objects with name and tiers properties
 
-        // Modify your showSection function
+// Updated showSection function
 function showSection(section) {
     document.getElementById('challengesSection').style.display = 
         section === 'challenges' ? 'block' : 'none';
@@ -1595,11 +1748,30 @@ function showSection(section) {
         section === 'dominants' ? 'block' : 'none';
     document.getElementById('ageSetupSection').style.display = 
         section === 'ageSetup' ? 'block' : 'none';
+    document.getElementById('meaningOfLifeSection').style.display = 
+        section === 'meaningOfLife' ? 'block' : 'none';
     
-    // Update sliders when showing age setup section
     if (section === 'ageSetup') {
         updateAgeSliders();
     }
+}
+
+// Add this function to initialize the feature
+function initializeMeaningOfLife() {
+    // Add the section to navigation
+    const navBar = document.querySelector('.dominant-nav');
+    navBar.innerHTML += `<button class="nav-button" onclick="showSection('meaningOfLife')">Meaning of Life</button>`;
+    
+    // No need to add the section to the container - it's already in the HTML
+    // No need to add CSS - it's already in the style section
+    
+    // Bind event listeners
+    document.getElementById('assignMeaningCards').addEventListener('click', assignMeaningCards);
+    document.getElementById('worldsEndButton').addEventListener('click', revealAllMeaningCards);
+    document.getElementById('resetMeaningButton').addEventListener('click', resetMeaningCards);
+    
+    // Initialize state
+    updateMeaningOfLifeSection();
 }
 
         function generateDominantList() {
@@ -2348,11 +2520,230 @@ function nextAge() {
         // Scroll will happen in displayCurrentAge()
     }
 }
+
+// Function to update the Meaning of Life section
+function updateMeaningOfLifeSection() {
+    const playerCardsContainer = document.getElementById('playerMeaningCards');
+    playerCardsContainer.innerHTML = '';
+    
+    const players = getPlayerNames();
+    
+    if (Object.keys(playerMeaningCards).length === 0) {
+        playerCardsContainer.innerHTML = '<div class="status-message">Click "Assign Meaning of Life Cards" to start.</div>';
+        return;
+    }
+    
+    players.forEach(player => {
+        const playerCard = document.createElement('div');
+        playerCard.className = 'player-meaning-card';
+        
+        const cards = playerMeaningCards[player] || [];
+        const chosenCardIndex = playerMeaningChoices[player];
+        const isRevealed = currentRevealPlayer === player;
+        
+        // Create player header
+        const playerHeader = document.createElement('div');
+        playerHeader.className = 'player-meaning-header';
+        playerHeader.innerHTML = `
+            <span class="player-name">${player}</span>
+            <button class="reveal-button" onclick="toggleRevealForPlayer('${player}')">
+                ${isRevealed ? 'Hide' : 'Reveal'}
+            </button>
+        `;
+        playerCard.appendChild(playerHeader);
+        
+        // Create cards container
+        const cardsContainer = document.createElement('div');
+        cardsContainer.className = 'meaning-cards-container';
+        cardsContainer.style.display = isRevealed ? 'flex' : 'none';
+        
+        if (cards.length > 0) {
+            cards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'meaning-card';
+                
+                // Add selected class if this card is chosen
+                if (chosenCardIndex === index) {
+                    cardElement.classList.add('selected-card');
+                }
+                
+                cardElement.innerHTML = `
+                    <div class="meaning-card-name">${card.name}</div>
+                    <div class="meaning-card-desc">${card.description}</div>
+                    ${chosenCardIndex === undefined ? 
+                        `<button class="choose-card-btn" onclick="chooseCard('${player}', ${index})">Choose</button>` : 
+                        ''}
+                `;
+                cardsContainer.appendChild(cardElement);
+            });
+        } else {
+            cardsContainer.innerHTML = '<div class="no-cards">No cards assigned yet</div>';
+        }
+        
+        playerCard.appendChild(cardsContainer);
+        playerCardsContainer.appendChild(playerCard);
+    });
+    
+// At the end of your updateMeaningOfLifeSection function, add:
+updateMeaningCardStatus();
+
+// If no player is currently revealing, highlight the next player
+if (currentRevealPlayer === null) {
+    highlightPlayers();
+}
+}
+
+// Function to update the status display
+function updateMeaningCardStatus() {
+    const statusElement = document.getElementById('meaningCardStatus');
+    const players = getPlayerNames();
+    const totalPlayers = players.length;
+    const playersWithChoices = Object.keys(playerMeaningChoices).length;
+    
+    if (Object.keys(playerMeaningCards).length === 0) {
+        statusElement.textContent = `Ready to assign cards to ${totalPlayers} players.`;
+        return;
+    }
+    
+    statusElement.textContent = `${playersWithChoices}/${totalPlayers} players have chosen their Meaning of Life.`;
+}
+
+// Function to assign cards to all players
+// Function to assign cards to all players
+function assignMeaningCards() {
+    const players = getPlayerNames();
+    const totalCards = meaningOfLifeData.length;
+    const requiredCards = players.length * 2;
+    
+    if (totalCards < requiredCards) {
+        alert(`Not enough Meaning of Life cards! You need at least ${requiredCards} cards for ${players.length} players, but only have ${totalCards}.`);
+        return;
+    }
+    
+    playerMeaningCards = {};
+    playerMeaningChoices = {};
+    currentRevealPlayer = null; // Don't automatically reveal first player
+    
+    const shuffledCards = [...meaningOfLifeData].sort(() => Math.random() - 0.5);
+    
+    players.forEach((player, index) => {
+        playerMeaningCards[player] = [
+            shuffledCards[index * 2],
+            shuffledCards[index * 2 + 1]
+        ];
+    });
+    
+    // Update the UI and highlight the first player instead of revealing
+    updateMeaningOfLifeSection();
+    // This will highlight the next player who should reveal their cards
+}
+
+// Function to toggle revealing cards for a player
+function toggleRevealForPlayer(playerName) {
+    // Check if we're trying to hide the current player's cards
+    if (currentRevealPlayer === playerName) {
+        // Hide the cards
+        currentRevealPlayer = null;
+        
+        // Find the next player who hasn't revealed yet
+        highlightPlayers();
+        updateMeaningOfLifeSection();
+        return;
+    }
+    
+    // If we're revealing a new player's cards
+    if (currentRevealPlayer !== null) {
+        const previousPlayer = currentRevealPlayer;
+        
+        if (playerMeaningChoices[previousPlayer] === undefined && 
+            playerMeaningCards[previousPlayer] && 
+            playerMeaningCards[previousPlayer].length > 0) {
+            alert(`${previousPlayer} must choose a Meaning of Life card before proceeding.`);
+            return;
+        }
+    }
+    
+    // Set the new player to reveal
+    currentRevealPlayer = playerName;
+    updateMeaningOfLifeSection();
+}
+
+// Function for a player to choose their card
+function chooseCard(playerName, cardIndex) {
+    playerMeaningChoices[playerName] = cardIndex;
+    updateMeaningOfLifeSection();
+    
+    setTimeout(() => {
+        if (currentRevealPlayer === playerName) {
+            toggleRevealForPlayer(playerName);
+        }
+    }, 1000);
+}
+
+// Function to reveal all cards at World's End
+function revealAllMeaningCards() {
+    const playerCardsContainer = document.getElementById('playerMeaningCards');
+    
+    const playerCardElements = playerCardsContainer.querySelectorAll('.player-meaning-card');
+    playerCardElements.forEach(card => {
+        const cardsContainer = card.querySelector('.meaning-cards-container');
+        cardsContainer.style.display = 'flex';
+        
+        const chooseButtons = cardsContainer.querySelectorAll('.choose-card-btn');
+        chooseButtons.forEach(btn => btn.style.display = 'none');
+    });
+    
+    const revealButtons = playerCardsContainer.querySelectorAll('.reveal-button');
+    revealButtons.forEach(btn => btn.disabled = true);
+    
+    const statusElement = document.getElementById('meaningCardStatus');
+    statusElement.innerHTML = '<strong style="color: var(--accent2);">WORLD\'S END!</strong> All Meaning of Life cards are revealed.';
+}
+
+// Function to reset the Meaning of Life cards
+function resetMeaningCards() {
+    playerMeaningCards = {};
+    playerMeaningChoices = {};
+    currentRevealPlayer = null;
+    updateMeaningOfLifeSection();
+}
+
+// Function to highlight the next player who should reveal their cards
+// Function to highlight all players who haven't made a choice yet
+function highlightPlayers() {
+    // Clear existing highlights
+    const revealButtons = document.querySelectorAll('.reveal-button');
+    revealButtons.forEach(btn => {
+        btn.classList.remove('next-player-highlight');
+    });
+    
+    // Find players who haven't made a choice yet
+    const players = getPlayerNames();
+    const playersWithoutChoice = players.filter(player => 
+        playerMeaningCards[player] && 
+        playerMeaningCards[player].length > 0 && 
+        playerMeaningChoices[player] === undefined
+    );
+    
+    if (playersWithoutChoice.length > 0) {
+        // Highlight ALL players who haven't made a choice yet
+        const playerCards = document.querySelectorAll('.player-meaning-card');
+        playerCards.forEach(card => {
+            const playerName = card.querySelector('.player-name').textContent;
+            if (playersWithoutChoice.includes(playerName)) {
+                const revealButton = card.querySelector('.reveal-button');
+                revealButton.classList.add('next-player-highlight');
+            }
+        });
+    }
+}
         // Initialize
         updateNameInputs(2);
         generateDominantList();
         updatePlayerSelects();
         updateAgeSliders();
+        initializeMeaningOfLife();
+        
     </script>
 </body>
 </html>
