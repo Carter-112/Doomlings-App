@@ -5,6 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOOMlings Companion</title>
     <style>
+    /* New styles to add */
+@media (max-width: 360px) {
+  .nav-button {
+    font-size: 0.85rem;
+    padding: 8px 4px;
+  }
+}
+
+/* For the age navigation buttons (if you have them) */
+.age-navigation {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: center;
+  margin: 0.5rem 0;
+}
+
+.age-navigation .nav-button {
+  width: 100%;
+}
+    
         .age-setup-section {
             display: none;
         }
@@ -181,20 +202,29 @@
             color: var(--text);
         }
 
-        .dominant-nav {
-            display: flex;
-            gap: 10px;
-            margin: 0.5rem 0;
-        }
+        /* Update these existing styles */
+.dominant-nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0.5rem 0;
+  width: 100%;
+}
 
-        .nav-button {
-            background: var(--accent2);
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
-            color: var(--text);
-            cursor: pointer;
-        }
+.nav-button {
+  background: var(--accent2);
+  padding: 10px 5px;
+  border-radius: 5px;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  width: 100%;
+}
 
         .dominant-section {
             display: none;
