@@ -5,6 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOOMlings Companion</title>
     <style>
+.trinkets-section {
+    display: none;
+}
+.player-trinkets {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+.player-trinket-card {
+    background: #16213e;
+    padding: 0.75rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.player-trinket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+.trinkets-container {
+    display: flex;
+    gap: 0.5rem;
+    flex-direction: column;
+}
+.trinket-card {
+    background: #30475e;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: all 0.3s;
+}
+.trinket-card.selected-card {
+    border-color: var(--accent1);
+    background: #30475e88;
+}
+.trinket-name {
+    font-weight: bold;
+    color: var(--accent2);
+    margin-bottom: 0.25rem;
+}
+.trinket-power, .trinket-objective, .trinket-points {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 0.25rem;
+}
+.trinket-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+.trinket-btn {
+    flex: 1;
+    background: var(--accent1);
+    color: #16213e;
+    border: none;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+.add-btn { background-color: #4ecca3; }
+.remove-btn { background-color: #e94560; }
+.pocket-btn { background-color: #ffd700; }
+.trinket-score {
+    background: #30475e;
+    padding: 0.25rem 0.5rem;
+    border-radius: 5px;
+    font-weight: bold;
+    color: var(--accent2);
+}
+#worldsEndTrinketButton {
+    background-color: var(--accent2);
+}
+#resetTrinketsButton {
+    background-color: #555;
+}
+    
     .next-player-highlight {
     animation: pulse 1.5s infinite;
     box-shadow: 0 0 10px #ffcc00;
@@ -313,11 +392,25 @@
         }
 
         /* Update these existing styles */
-.dominant-nav {
+.nav {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-  gap: 8px;
-  margin: 0.5rem 0;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, auto);
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+/* For the bottom row buttons */
+.nav-button:nth-child(4) {
+  grid-column: 1;
+  margin-left: 55%;
+  width: 100%;
+}
+
+.nav-button:nth-child(5) {
+  grid-column: 2;
+  margin-left: 55%;
   width: 100%;
 }
 
@@ -329,7 +422,7 @@
   color: var(--text);
   cursor: pointer;
   text-align: center;
-  white-space: nowrap;
+  white-space: nowrap; /* No wrapping */
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
@@ -421,6 +514,13 @@
 </head>
 <body>
     <div class="container">
+      <div class="nav">
+    <button class="nav-button" onclick="showSection('challenges')">Challenges</button>
+    <button class="nav-button" onclick="showSection('dominants')">Dominants</button>
+    <button class="nav-button" onclick="showSection('ageSetup')">Age Setup</button>
+    <button class="nav-button" onclick="showSection('meaningOfLife')">Meaning of Life</button>
+    <button class="nav-button" onclick="showSection('trinkets')">Trinkets</button>
+</div>
         <div id="ageSetupSection" class="age-setup-section">
             <h2 class="section-title">Age Setup</h2>
             
@@ -461,11 +561,6 @@
                 Generate a deck to start
             </div>
         </div>
-        <div class="dominant-nav">
-          <button class="nav-button" onclick="showSection('challenges')">Challenges</button>
-          <button class="nav-button" onclick="showSection('dominants')">Dominants</button>
-          <button class="nav-button" onclick="showSection('ageSetup')">Age Setup</button>
-      </div>
 
         <div id="challengesSection">
             <h1 class="title">DOOMlings</h1>
@@ -517,9 +612,27 @@
     </div>
 </div>
     </div>
+<!-- Trinkets Section -->
+<div id="trinketsSection" class="trinkets-section">
+    <h2 class="section-title">Trinkets</h2>
+    
+    <div class="player-control">
+        <button id="assignTrinkets" class="generate-btn">Assign Trinkets</button>
+        <div id="trinketStatus" class="status-display"></div>
+    </div>
+    
+    <div id="playerTrinkets" class="player-trinkets">
+        <!-- Player trinket cards will be generated here -->
+    </div>
+    
+    <div class="action-buttons">
+        <button id="worldsEndTrinketButton" class="nav-button">World's End: Show Scores</button>
+        <button id="resetTrinketsButton" class="nav-button">Reset Trinkets</button>
+    </div>
+</div>
 
     <script>
-      // Meaning of Life card data
+// Meaning of Life card data
 // sM represents signMultiplication - a scaling factor based on number of ages
 const meaningOfLifeData = [
     {
@@ -1917,30 +2030,26 @@ const catastropheAgeData = [
 ];// Add your dominant data here as objects with name and tiers properties
 
 // Updated showSection function
+// Updated showSection function to include trinkets
 function showSection(section) {
-    document.getElementById('challengesSection').style.display = 
-        section === 'challenges' ? 'block' : 'none';
-    document.getElementById('dominantSection').style.display = 
-        section === 'dominants' ? 'block' : 'none';
-    document.getElementById('ageSetupSection').style.display = 
-        section === 'ageSetup' ? 'block' : 'none';
-    document.getElementById('meaningOfLifeSection').style.display = 
-        section === 'meaningOfLife' ? 'block' : 'none';
-    
-    if (section === 'ageSetup') {
-        updateAgeSliders();
-    }
+  document.getElementById('challengesSection').style.display = 
+      section === 'challenges' ? 'block' : 'none';
+  document.getElementById('dominantSection').style.display = 
+      section === 'dominants' ? 'block' : 'none';
+  document.getElementById('ageSetupSection').style.display = 
+      section === 'ageSetup' ? 'block' : 'none';
+  document.getElementById('meaningOfLifeSection').style.display = 
+      section === 'meaningOfLife' ? 'block' : 'none';
+  document.getElementById('trinketsSection').style.display = 
+      section === 'trinkets' ? 'block' : 'none';
+  
+  if (section === 'ageSetup') {
+      updateAgeSliders();
+  }
 }
 
 // Add this function to initialize the feature
 function initializeMeaningOfLife() {
-    // Add the section to navigation
-    const navBar = document.querySelector('.dominant-nav');
-    navBar.innerHTML += `<button class="nav-button" onclick="showSection('meaningOfLife')">Meaning of Life</button>`;
-    
-    // No need to add the section to the container - it's already in the HTML
-    // No need to add CSS - it's already in the style section
-    
     // Bind event listeners
     document.getElementById('assignMeaningCards').addEventListener('click', assignMeaningCards);
     document.getElementById('worldsEndButton').addEventListener('click', revealAllMeaningCards);
@@ -2697,6 +2806,261 @@ function nextAge() {
     }
 }
 
+// Add Trinket data structure (5 placeholders)
+const trinketData = [
+  { name: "Crystal Shard", power: "Draw 1 extra card at the start of your turn", objective: "Have at least 5 traits of different colors", points: 5 },
+  { name: "Clockwork Beetle", power: "Ignore one catastrophe effect per game", objective: "Play 3 or more traits with negative values", points: 7 },
+  { name: "Shadow Pendant", power: "Play one additional trait on your turn", objective: "Have at least 3 purple traits in your trait pile", points: 8 },
+  { name: "Ember Stone", power: "Your gene pool cannot be reduced below 2", objective: "Play 4 red traits in one game", points: 6 },
+  { name: "Vine Bracelet", power: "Return one trait from discard pile to your hand once per game", objective: "Have more green traits than any opponent", points: 7 }
+];
+
+// State variables for Trinkets feature
+let playerTrinkets = {}; // Holds each player's current trinkets
+let playerTrinketScores = {}; // Holds each player's trinket scores
+let availableTrinkets = []; // Available trinkets to choose from
+
+// Function to initialize trinket system
+function initializeTrinkets() {
+  // Add event listeners
+  document.getElementById('assignTrinkets').addEventListener('click', assignTrinkets);
+  document.getElementById('worldsEndTrinketButton').addEventListener('click', showTrinketScores);
+  document.getElementById('resetTrinketsButton').addEventListener('click', resetTrinkets);
+  
+  // Initialize state
+  resetTrinkets();
+}
+
+function updateTrinketSection() {
+  const playerTrinketsContainer = document.getElementById('playerTrinkets');
+  playerTrinketsContainer.innerHTML = '';
+  
+  const players = getPlayerNames();
+  
+  if (Object.keys(playerTrinkets).length === 0) {
+    playerTrinketsContainer.innerHTML = '<div class="status-message">Click "Assign Trinkets" to start.</div>';
+    return;
+  }
+  
+  players.forEach(player => {
+    const playerCard = document.createElement('div');
+    playerCard.className = 'player-trinket-card';
+    
+    const trinkets = playerTrinkets[player] || [];
+    const score = playerTrinketScores[player] || 0;
+    
+    // Create player header
+    const playerHeader = document.createElement('div');
+    playerHeader.className = 'player-trinket-header';
+    playerHeader.innerHTML = `
+      <span class="player-name">${player}</span>
+      <span class="trinket-score">Score: ${score}</span>
+    `;
+    playerCard.appendChild(playerHeader);
+    
+    // Create trinkets container
+    const trinketsContainer = document.createElement('div');
+    trinketsContainer.className = 'trinkets-container';
+    
+    if (trinkets.length > 0) {
+      trinkets.forEach((trinket, index) => {
+        const trinketElement = document.createElement('div');
+        trinketElement.className = 'trinket-card';
+        
+        trinketElement.innerHTML = `
+          <div class="trinket-name">${trinket.name}</div>
+          <div class="trinket-power"><strong>Power:</strong> ${trinket.power}</div>
+          <div class="trinket-objective"><strong>Objective:</strong> ${trinket.objective}</div>
+          <div class="trinket-points"><strong>Points:</strong> ${trinket.points}</div>
+          <div class="trinket-actions">
+            <button class="trinket-btn add-btn" onclick="addTrinket('${player}', ${index})"${trinkets.length === 2 ? '' : (availableTrinkets.length === 0 ? ' disabled' : '')}>Add</button>
+            <button class="trinket-btn remove-btn" onclick="removeTrinket('${player}', ${index})">Remove</button>
+            <button class="trinket-btn pocket-btn" onclick="pocketTrinket('${player}', ${index})"${trinkets.length === 2 ? ' disabled' : ''}>Pocket</button>
+          </div>
+        `;
+        trinketsContainer.appendChild(trinketElement);
+      });
+    } else {
+      // For players with 0 trinkets, show a single card with only the Add button enabled
+      const emptyCard = document.createElement('div');
+      emptyCard.className = 'trinket-card empty-trinket';
+      emptyCard.innerHTML = `
+        <div class="no-trinkets">No trinkets assigned</div>
+        <div class="trinket-actions">
+          <button class="trinket-btn add-btn" onclick="addTrinket('${player}', 0)"${availableTrinkets.length === 0 ? ' disabled' : ''}>Add</button>
+          <button class="trinket-btn remove-btn" disabled>Remove</button>
+          <button class="trinket-btn pocket-btn" disabled>Pocket</button>
+        </div>
+      `;
+      trinketsContainer.appendChild(emptyCard);
+    }
+    
+    playerCard.appendChild(trinketsContainer);
+    playerTrinketsContainer.appendChild(playerCard);
+  });
+  
+  updateTrinketStatus();
+}
+
+function updateTrinketStatus() {
+  const statusElement = document.getElementById('trinketStatus');
+  const players = getPlayerNames();
+  const availableCount = availableTrinkets.length;
+  
+  if (Object.keys(playerTrinkets).length === 0) {
+    statusElement.textContent = `Ready to assign trinkets to ${players.length} players. ${availableCount} trinkets available.`;
+    return;
+  }
+  
+  statusElement.textContent = `${availableCount} trinkets available. Use add/remove/pocket to manage your trinkets.`;
+}
+
+// Function to assign initial trinkets to all players
+function assignTrinkets() {
+  const players = getPlayerNames();
+  
+  // Check if any players already have trinkets
+  const playersWithTrinkets = Object.keys(playerTrinkets).some(player => 
+    playerTrinkets[player] && playerTrinkets[player].length > 0
+  );
+  
+  if (playersWithTrinkets) {
+    alert("Some players already have trinkets. You need to reset trinkets first before reassigning.");
+    return;
+  }
+  
+  // Reset state
+  resetTrinkets();
+  
+  // Shuffle available trinkets initially
+  availableTrinkets.sort(() => Math.random() - 0.5);
+  
+  // Assign 2 trinkets to each player from the top of the deck
+  players.forEach(player => {
+    if (availableTrinkets.length >= 2) {
+      playerTrinkets[player] = [
+        availableTrinkets.shift(),
+        availableTrinkets.shift()
+      ];
+      playerTrinketScores[player] = 0;
+    } else {
+      alert("Not enough trinkets available!");
+    }
+  });
+  
+  // Update UI
+  updateTrinketSection();
+}
+
+function addTrinket(playerName, trinketIndex) {
+  const currentTrinkets = playerTrinkets[playerName] || [];
+  
+  // If 2 trinkets, handle the special case first (keep one, return the other)
+  if (currentTrinkets.length === 2) {
+    // Find the index of the "other" trinket (the one NOT clicked)
+    const otherIndex = trinketIndex === 0 ? 1 : 0;
+    
+    // Return the other trinket to the bottom of the deck
+    availableTrinkets.push(currentTrinkets[otherIndex]);
+    
+    // Keep only the current trinket
+    playerTrinkets[playerName] = [currentTrinkets[trinketIndex]];
+  }
+  // For 0 or 1 trinket, check if we have available trinkets to draw
+  else if (availableTrinkets.length === 0) {
+    alert("No trinkets available!");
+    return;
+  }
+  // If 0 trinkets, add one from the top
+  else if (currentTrinkets.length === 0) {
+    const newTrinket = availableTrinkets.shift();
+    playerTrinkets[playerName] = [newTrinket];
+  }
+  // If 1 trinket, add another from the top
+  else if (currentTrinkets.length === 1) {
+    const newTrinket = availableTrinkets.shift();
+    currentTrinkets.push(newTrinket);
+    playerTrinkets[playerName] = currentTrinkets;
+  }
+  
+  // Update UI
+  updateTrinketSection();
+}
+
+function removeTrinket(playerName, trinketIndex) {
+  const currentTrinkets = playerTrinkets[playerName] || [];
+  
+  if (currentTrinkets.length === 0) {
+    return;
+  }
+  
+  // Return the trinket to the bottom of the deck
+  availableTrinkets.push(currentTrinkets[trinketIndex]);
+  
+  // Remove that specific trinket
+  currentTrinkets.splice(trinketIndex, 1);
+  playerTrinkets[playerName] = currentTrinkets;
+  
+  // If player now has 0 trinkets and there are available trinkets,
+  // automatically add a new one from the top
+  if (currentTrinkets.length === 0 && availableTrinkets.length > 0) {
+    addTrinket(playerName, 0);
+    return; // addTrinket will call updateTrinketSection
+  }
+  
+  // Update UI
+  updateTrinketSection();
+}
+
+function pocketTrinket(playerName, trinketIndex) {
+  const currentTrinkets = playerTrinkets[playerName] || [];
+  
+  if (currentTrinkets.length === 0 || trinketIndex >= currentTrinkets.length) {
+    alert("No trinket to pocket!");
+    return;
+  }
+  
+  // Add trinket's points to the player's score
+  const trinket = currentTrinkets[trinketIndex];
+  playerTrinketScores[playerName] = (playerTrinketScores[playerName] || 0) + trinket.points;
+  
+  // Remove the trinket from the player (don't return it to the pool)
+  currentTrinkets.splice(trinketIndex, 1);
+  playerTrinkets[playerName] = currentTrinkets;
+  
+  // If player now has 0 trinkets and there are available trinkets,
+  // automatically add a new one from the top
+  if (currentTrinkets.length === 0 && availableTrinkets.length > 0) {
+    addTrinket(playerName, 0);
+    return; // addTrinket will call updateTrinketSection
+  }
+  
+  // Update UI
+  updateTrinketSection();
+}
+
+// Function to show World's End scores
+function showTrinketScores() {
+  const players = getPlayerNames();
+  let scoreDisplay = '<h3>World\'s End Trinket Scores</h3>';
+  
+  players.forEach(player => {
+      const score = playerTrinketScores[player] || 0;
+      scoreDisplay += `<div class="player-score"><strong>${player}:</strong> ${score} points</div>`;
+  });
+  
+  // Display the scores in the status area
+  const statusElement = document.getElementById('trinketStatus');
+  statusElement.innerHTML = scoreDisplay;
+}
+
+function resetTrinkets() {
+  playerTrinkets = {};
+  playerTrinketScores = {};
+  availableTrinkets = [...trinketData]; // Create a fresh copy of the trinket data
+  updateTrinketSection();
+}
+
 // Function to update the Meaning of Life section
 function updateMeaningOfLifeSection() {
     const playerCardsContainer = document.getElementById('playerMeaningCards');
@@ -2996,6 +3360,7 @@ function highlightPlayers() {
         updatePlayerSelects();
         updateAgeSliders();
         initializeMeaningOfLife();
+        initializeTrinkets();
         
     </script>
 </body>
