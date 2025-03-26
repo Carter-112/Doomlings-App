@@ -401,20 +401,65 @@
   margin-bottom: 10px;
 }
 
-/* For the bottom row buttons */
-.nav-button:nth-child(4) {
-  grid-column: 1;
+/* For the top/bottom row buttons */
+.nav {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, auto);
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.nav {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, auto);
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.nav > .nav-button:nth-child(1) {
+ /* grid-column: 1;
   margin-left: 55%;
+  width: 100%;*/
+  grid-colum:1;
   width: 100%;
 }
 
-.nav-button:nth-child(5) {
-  grid-column: 2;
+.nav > .nav-button:nth-child(2) {
+ /* grid-column: 2;
   margin-left: 55%;
+  width: 100%;*/
+  grid-column:2;
   width: 100%;
 }
 
-.nav-button {
+.nav > .nav-button:nth-child(3) {
+  /*grid-row: 2;
+  grid-column: 1;*/
+  grid-column:3;
+  width: 100%;
+}
+
+.nav > .nav-button:nth-child(4) {
+ /* grid-row: 2;
+  grid-column: 2;*/
+  grid-row:2;
+  grid-column:1;
+  margin-left:55%;
+}
+
+.nav > .nav-button:nth-child(5) {
+  /*grid-row: 2;
+  grid-column: 3;*/
+  grid-row:2;
+  grid-column:2;
+  margin-left:55%;
+}
+
+.nav > .nav-button {
   background: var(--accent2);
   padding: 10px 5px;
   border-radius: 5px;
